@@ -10,7 +10,7 @@
 FROM python:3.9.3
 
 WORKDIR /app
-RUN pip install --root-user-action=ignore requests
+
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
