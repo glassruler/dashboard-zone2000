@@ -8,7 +8,7 @@
 
 
 FROM python:3.9.3
-
+RUN pip install --upgrade pip
 WORKDIR /app
 
 COPY requirements.txt .
