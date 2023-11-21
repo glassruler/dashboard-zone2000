@@ -9,6 +9,8 @@
 
 FROM python:3.9.3
 RUN pip install --upgrade pip
+RUN apt-get update
+RUN apt-get install -y python3 python3-pip python3-venv
 WORKDIR /app
 
 COPY requirements.txt .
