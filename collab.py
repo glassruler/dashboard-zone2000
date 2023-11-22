@@ -124,7 +124,7 @@ category_df = filtered_df.groupby(by = ["Category"], as_index = False)["Sales"].
 cl1, cl2 = st.columns((2))
 with cl1:
     with st.expander("Category_ViewData"):
-        st.write(category_df.style.background_gradient(cmap="Blues"))
+        st.write(category_df)
         csv = category_df.to_csv(index = False).encode('utf-8')
         st.download_button("Download Data", data = csv, file_name = "Category.csv", mime = "text/csv",
                             help = 'Click here to download the data as a CSV file')
@@ -132,7 +132,7 @@ with cl1:
 with cl2:
     with st.expander("Branch_ViewData"):
         region = filtered_df.groupby(by = "Center", as_index = False)["Sales"].sum()
-        st.write(region.style.background_gradient(cmap="Oranges"))
+        st.write(region)
         csv = region.to_csv(index = False).encode('utf-8')
         st.download_button("Download Data", data = csv, file_name = "Cabang.csv", mime = "text/csv",
                         help = 'Click here to download the data as a CSV file')
