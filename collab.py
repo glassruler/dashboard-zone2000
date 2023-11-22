@@ -108,11 +108,11 @@ elif not region and not city:
     filtered_df = datagame_df[datagame_df
     ["GameTitle"].isin(state)]
 elif state and city:
-    filtered_df = df3[df["GameTitle"].isin(state) & df3["Keterangan"].isin(city)]
+    filtered_df = df3[datagame_df["GameTitle"].isin(state) & df3["Keterangan"].isin(city)]
 elif region and city:
-    filtered_df = df3[df["Center"].isin(region) & df3["Keterangan"].isin(city)]
+    filtered_df = df3[datagame_df["Center"].isin(region) & df3["Keterangan"].isin(city)]
 elif region and state:
-    filtered_df = df3[df["Center"].isin(region) & df3["GameTitle"].isin(state)]
+    filtered_df = df3[datagame_df["Center"].isin(region) & df3["GameTitle"].isin(state)]
 elif city:
     filtered_df = df3[df3["Keterangan"].isin(city)]
 else:
