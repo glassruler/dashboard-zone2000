@@ -45,8 +45,8 @@ dataomzet_df["month_year"] = dataomzet_df["BulanTahun"].dt.to_period("M")
 st.subheader('Omzet Zone2000 perbulan (Zone|Kiddieland|Playcafe)')
 
 linechart = pd.DataFrame(dataomzet_df.groupby(dataomzet_df["month_year"].dt.strftime("%Y : %b"))["TotalPenjualan"].sum()).reset_index()
-fig2 = px.line(linechart, x = "month_year", y="TotalPenjualan", labels = {"TotalPenjualan": "Amount"},height=500, width = 1000,template="gridon")
-st.plotly_chart(fig2,use_container_width=True)
+# fig2 = px.line(linechart, x = "month_year", y="TotalPenjualan", labels = {"TotalPenjualan": "Amount"},height=500, width = 1000,template="gridon")
+# st.plotly_chart(fig2,use_container_width=True)
 
 _, view1, dwn1, view2, dwn2 = st.columns([0.15,0.20,0.20,0.20,0.20])
 with st.expander("Omzet Perbulan Zone2000:"):
@@ -140,8 +140,8 @@ with cl2:
 filtered_df["month_year"] = filtered_df["Order Date"].dt.to_period("M")
 
 linechart = pd.DataFrame(filtered_df.groupby(filtered_df["month_year"].dt.strftime("%Y : %b"))["Sales"].sum()).reset_index()
-fig2 = px.line(linechart, x = "month_year", y="Sales", labels = {"Sales": "Amount"},height=500, width = 1000,template="gridon")
-st.plotly_chart(fig2,use_container_width=True)
+# fig2 = px.line(linechart, x = "month_year", y="Sales", labels = {"Sales": "Amount"},height=500, width = 1000,template="gridon")
+# st.plotly_chart(fig2,use_container_width=True)
 
 with st.expander("View Data of TimeSeries:"):
     st.write(linechart.T.style.background_gradient(cmap="Blues"))
