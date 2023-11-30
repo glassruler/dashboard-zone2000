@@ -120,25 +120,20 @@ else:
 
 category_df = filtered_df.groupby(by = ["Category"], as_index = False)["Sales"].sum()
 
+with st.expander("View Data by Category | Center | Gamtitle:"):
 
-cl1, cl2, cl3 = st.columns((3))
-with cl1:
-    with st.expander("Category_ViewData"):
         st.write(category_df)
         csv = category_df.to_csv(index = False).encode('utf-8')
         st.download_button("Download Data", data = csv, file_name = "Category.csv", mime = "text/csv",
                             help = 'Click here to download the data as a CSV file')
 
-with cl2:
-    with st.expander("Branch_ViewData"):
         region = filtered_df.groupby(by = "Center", as_index = False)["Sales"].sum()
         st.write(region)
         csv = region.to_csv(index = False).encode('utf-8')
         st.download_button("Download Data", data = csv, file_name = "Cabang.csv", mime = "text/csv",
                         help = 'Click here to download the data as a CSV file')
 
-with cl3:
-    with st.expander("Gametitle_ViewData"):
+
         region = filtered_df.groupby(by = "GameTitle", as_index = False)["Sales"].sum()
         st.write(region)
         csv = region.to_csv(index = False).encode('utf-8')
