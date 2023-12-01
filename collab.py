@@ -10,7 +10,7 @@ st.set_page_config(page_title="DASH GAME", page_icon=":bar_chart:",layout="wide"
 
 st.title(" :bar_chart: DASHBOARD REPORT ZONE2000")
 st.markdown('<style>div.block-container{padding-top:1rem;}</style>',unsafe_allow_html=True)
-st.markdown('<style>.st-emotion-cache-tvhsbf{position: relative; display:block; width:auto; text-align:center; overflow-x:auto;</style>', unsafe_allow_html=True)
+st.markdown('<style>.st-emotion-cache-tvhsbf{position: relative; display:block; width:300px; text-align:center; overflow-x:auto;</style>', unsafe_allow_html=True)
 
 #load data frame
 dict_df = pd.read_excel('collabreport.xlsx', 
