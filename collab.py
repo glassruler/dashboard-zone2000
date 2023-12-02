@@ -10,7 +10,7 @@ st.set_page_config(page_title="DASH GAME", page_icon=":bar_chart:",layout="wide"
 
 st.title(" :bar_chart: DASHBOARD REPORT ZONE2000")
 st.markdown('<style>div.block-container{padding-top:1rem;}</style>',unsafe_allow_html=True)
-st.markdown('<style>.st-emotion-cache-tvhsbf{position: relative; display:block; width:auto; overflow-x:auto;</style>', unsafe_allow_html=True)
+# st.markdown('<style>.st-emotion-cache-tvhsbf{position: relative; display:block; width:auto; overflow-x:auto;</style>', unsafe_allow_html=True)
 
 #load data frame
 dict_df = pd.read_excel('collabreport.xlsx', 
@@ -144,7 +144,7 @@ with st.expander("View Data by Category | Center | Gamtitle:"):
 filtered_df["month_year"] = filtered_df["Order Date"].dt.to_period("M")
 
 linechart = pd.DataFrame(filtered_df.groupby(filtered_df["month_year"].dt.strftime("%Y : %b"))["Sales"].sum()).reset_index()
-linechart["Sales"] = linechart["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+# linechart["Sales"] = linechart["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
 # fig2 = px.line(linechart, x = "month_year", y="Sales", labels = {"Sales": "Amount"},height=500, width = 1000,template="gridon")
 # st.plotly_chart(fig2,use_container_width=True)
 
