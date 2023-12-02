@@ -10,7 +10,7 @@ st.set_page_config(page_title="DASH GAME", page_icon=":bar_chart:",layout="wide"
 
 st.title(" :bar_chart: DASHBOARD REPORT ZONE2000")
 st.markdown('<style>div.block-container{padding-top:1rem;}</style>',unsafe_allow_html=True)
-# st.markdown('<style>.st-emotion-cache-tvhsbf{position: relative; display:block; width:auto; overflow-x:auto;</style>', unsafe_allow_html=True)
+st.markdown('<style>.st-emotion-cache-tvhsbf{position: relative; display:block; width:auto;</style>', unsafe_allow_html=True)
 
 #load data frame
 dict_df = pd.read_excel('collabreport.xlsx', 
@@ -46,6 +46,8 @@ dataomzet_df["month_year"] = dataomzet_df["BulanTahun"].dt.to_period("M")
 st.subheader('Omzet Zone2000 perbulan (Zone|Kiddieland|Playcafe)')
 
 linechart = pd.DataFrame(dataomzet_df.groupby(dataomzet_df["month_year"].dt.strftime("%Y : %b"))["TotalPenjualan"].sum()).reset_index()
+linechart["TotalPenjualan"] = linechart["TotalPenjualan"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+
 # fig2 = px.line(linechart, x = "month_year", y="TotalPenjualan", labels = {"TotalPenjualan": "Amount"},height=500, width = 1000,template="gridon")
 # st.plotly_chart(fig2,use_container_width=True)
 
@@ -120,6 +122,7 @@ else:
     filtered_df = df3[df3["Center"].isin(region) & df3["GameTitle"].isin(state) & df3["Keterangan"].isin(city)]
 
 category_df = filtered_df.groupby(by = ["Category"], as_index = False)["Sales"].sum()
+category_df["Sales"] = category_df["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
 
 with st.expander("View Data by Category | Center | Gamtitle:"):
 
@@ -129,6 +132,8 @@ with st.expander("View Data by Category | Center | Gamtitle:"):
                             help = 'Click here to download the data as a CSV file')
 
         region = filtered_df.groupby(by = "Center", as_index = False)["Sales"].sum()
+        region["Sales"] = region["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+  
         st.write(region)
         csv = region.to_csv(index = False).encode('utf-8')
         st.download_button("Download Data", data = csv, file_name = "Cabang.csv", mime = "text/csv",
@@ -136,6 +141,8 @@ with st.expander("View Data by Category | Center | Gamtitle:"):
 
 
         region = filtered_df.groupby(by = "GameTitle", as_index = False)["Sales"].sum()
+        region["Sales"] = region["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+  
         st.write(region)
         csv = region.to_csv(index = False).encode('utf-8')
         st.download_button("Download Data", data = csv, file_name = "Gametitle.csv", mime = "text/csv",
@@ -144,7 +151,8 @@ with st.expander("View Data by Category | Center | Gamtitle:"):
 filtered_df["month_year"] = filtered_df["Order Date"].dt.to_period("M")
 
 linechart = pd.DataFrame(filtered_df.groupby(filtered_df["month_year"].dt.strftime("%Y : %b"))["Sales"].sum()).reset_index()
-# linechart["Sales"] = linechart["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+linechart["Sales"] = linechart["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+
 # fig2 = px.line(linechart, x = "month_year", y="Sales", labels = {"Sales": "Amount"},height=500, width = 1000,template="gridon")
 # st.plotly_chart(fig2,use_container_width=True)
 
