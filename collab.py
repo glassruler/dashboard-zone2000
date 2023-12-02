@@ -144,6 +144,7 @@ with st.expander("View Data by Category | Center | Gamtitle:"):
 filtered_df["month_year"] = filtered_df["Order Date"].dt.to_period("M")
 
 linechart = pd.DataFrame(filtered_df.groupby(filtered_df["month_year"].dt.strftime("%Y : %b"))["Sales"].sum()).reset_index()
+linechart["Sales"] = linechart["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
 # fig2 = px.line(linechart, x = "month_year", y="Sales", labels = {"Sales": "Amount"},height=500, width = 1000,template="gridon")
 # st.plotly_chart(fig2,use_container_width=True)
 
