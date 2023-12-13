@@ -187,3 +187,44 @@ if authentication_status:
         st.write(linechart.T.style.background_gradient(cmap="Blues"))
         csv = linechart.to_csv(index=False).encode("utf-8")
         st.download_button('Download Data', data = csv, file_name = "TimeSeries.csv", mime ='text/csv')
+
+    st.divider()
+    st.subheader('Report Pengeluaran Barang CH')
+
+    col1, col2 = st.columns((2))
+    
+
+    datach_df["Date"] = pd.to_datetime(datach_df["Date"])
+
+    # Getting the min and max date 
+    startDate = pd.to_datetime(datach_df["Date"]).max()
+    endDate = pd.to_datetime(datach_df["Date"]).max()
+
+    with col1:
+        date1 = pd.to_datetime(st.date_input("Start Date", startDate))
+
+    with col2:
+        date2 = pd.to_datetime(st.date_input("End Date", endDate))
+
+    datach_df = datach_df[(datach_df["Date"] >= date1) & (datach_df["Date"] <= date2)].copy()
+
+    toko=st.selectbox("Filter By Toko:",
+                            # options=existing_data["NamaToko"] , index=None 
+                            options=datach_df["Center"].unique()                          
+                            )
+    selection_query=datach_df.query(
+    "Center== @toko"
+    )
+
+    st.dataframe(selection_query)
+    "---"
+    st.text("Total Pengeluaran Barang CH By Range Tanggal")
+    st.dataframe(datach_df)
+    view1, dwn1 = st.columns((2))
+    with view1:
+        expander = st.expander("Summary Total by Range Tanggal")
+        vendor_data = datach_df[["Center","Jumlah"]].groupby(by="Center")["Jumlah"].sum()
+        expander.write(vendor_data)
+    with dwn1:
+        st.download_button("Get Data", data = vendor_data.to_csv().encode("utf-8"),
+                           file_name="TotalPengeluaranCH.csv", mime="text/csv")
