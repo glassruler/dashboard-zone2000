@@ -12,8 +12,8 @@ import streamlit_authenticator as stauth
 st.set_page_config(page_title="DASH GAME", page_icon=":bar_chart:",layout="wide")
 
 # update login
-names = ["Wahyu Hidayat", "Admin Zobu"]
-usernames = ["hidayat", "admzobu"]
+names = ["Wahyu Hidayat", "Admin Zobu","Roger Tumewu"]
+usernames = ["hidayat", "admzobu", "roger"]
 
 file_path = Path(__file__).parent / "hashed_pw.pkl"
 with file_path.open("rb") as file:
