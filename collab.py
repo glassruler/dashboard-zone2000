@@ -67,7 +67,7 @@ if authentication_status:
     
     
     dataomzet_df["month_year"] = dataomzet_df["BulanTahun"].dt.to_period("M")
-    st.subheader('Omzet Zone2000 perbulan (Zone|Kiddieland|Playcafe)')
+    st.subheader('Omzet PLAYZONE perbulan (Zone|Kiddieland|Playcafe)')
     
     linechart = pd.DataFrame(dataomzet_df.groupby(dataomzet_df["month_year"].dt.strftime("%Y : %b"))["TotalPenjualan"].sum()).reset_index()
     linechart["TotalPenjualan"] = linechart["TotalPenjualan"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
@@ -76,7 +76,7 @@ if authentication_status:
     # st.plotly_chart(fig2,use_container_width=True)
     
     _, view1, dwn1, view2, dwn2 = st.columns([0.15,0.20,0.20,0.20,0.20])
-    with st.expander("Omzet Perbulan Zone2000:"):
+    with st.expander("Omzet Perbulan PLAYZONE:"):
         st.write(linechart.T.style.background_gradient(cmap="Blues"))
         csv = linechart.to_csv(index=False).encode("utf-8")
         st.download_button('Download Data', data = csv, file_name = "TotalPenjualan.csv", mime ='text/csv')
@@ -89,7 +89,7 @@ if authentication_status:
     # DASHBOAR GAME TITLE MULAI DISINI    
     st.divider()
     
-    st.subheader('Omzet Zone2000 perbulan (Kategori Game)')
+    st.subheader('Omzet PLAYZONE perbulan (Kategori Game)')
     
     col1, col2 = st.columns((2))
     
