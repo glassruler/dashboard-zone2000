@@ -31,7 +31,7 @@ if authentication_status == None:
     st.warning("Please enter username & password")
 
 if authentication_status:
-    st.title(" :bar_chart: DASHBOARD REPORT ZONE2000")
+    st.title(" :bar_chart: DASHBOARD REPORT PLAYZONE")
     st.markdown('<style>div.block-container{padding-top:1rem;}</style>',unsafe_allow_html=True)
     st.markdown('<style>.st-emotion-cache-tvhsbf{position: relative; display:block; width:auto;</style>', unsafe_allow_html=True)
     
