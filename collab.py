@@ -219,7 +219,7 @@ if authentication_status:
 
     st.dataframe(selection_query)
     "---"
-    st.text("Total Pengeluaran Barang CH By Range Tanggal")
+    st.text("Detail Pengeluaran Barang CH By Range Tanggal")
     st.dataframe(datach_df)
     view1, dwn1 = st.columns((2))
     with view1:
