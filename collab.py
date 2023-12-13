@@ -37,11 +37,12 @@ if authentication_status:
     
     #load data frame
     dict_df = pd.read_excel('collabreport.xlsx', 
-                       sheet_name=['dataomzet','datagame'])
+                       sheet_name=['dataomzet','datagame','datach'])
     
     # Get DataFrame from Dict
     dataomzet_df = dict_df .get('dataomzet')
     datagame_df = dict_df .get('datagame')
+    datach_df = dict_df .get('datach')
     
     # colom omzet dan sales by branch
     
