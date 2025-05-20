@@ -86,17 +86,21 @@ elif authentication_status:
     region = st.sidebar.multiselect("Pick your Branch", filtered_game_df["Center"].unique())
     state = st.sidebar.multiselect("Pick the Game Title", filtered_game_df["GameTitle"].unique())
     city = st.sidebar.multiselect("Pick the Game Code", filtered_game_df["Keterangan"].unique())
+    category = st.sidebar.multiselect("Pick the Game Category", filtered_game_df["Category"].dropna().unique())
 
-    def filter_data(df, regions, states, cities):
+    def filter_data(df, regions, states, cities, categories):
         if regions:
             df = df[df["Center"].isin(regions)]
         if states:
             df = df[df["GameTitle"].isin(states)]
         if cities:
             df = df[df["Keterangan"].isin(cities)]
+        if categories:
+            df = df[df["Category"].isin(categories)]
         return df
 
-    filtered_df = filter_data(filtered_game_df, region, state, city)
+
+    filtered_df = filter_data(filtered_game_df, region, state, city, category)
 
     category_df = filtered_df.groupby("Category", as_index=False)["Sales"].sum()
     category_df["Sales"] = category_df["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
