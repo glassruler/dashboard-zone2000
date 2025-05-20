@@ -126,12 +126,29 @@ elif authentication_status:
         csv = region_df.to_csv(index=False).encode('utf-8')
         st.download_button("Download Data", data=csv, file_name="Cabang.csv", mime="text/csv", help='Click here to download the data as a CSV file')
 
-        game_title_df = filtered_df.groupby("GameTitle", as_index=False)["Sales"].sum()
+        #game_title_df = filtered_df.groupby("GameTitle", as_index=False)["Sales"].sum()
+        #game_title_df["Sales"] = game_title_df["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+        #st.write(game_title_df)
+        #csv = game_title_df.to_csv(index=False).encode('utf-8')
+        #st.download_button("Download Data", data=csv, file_name="Gametitle.csv", mime="text/csv", help='Click here to download the data as a CSV file')
+        game_title_df = filtered_df.groupby(["GameTitle", "Category"], as_index=False)["Sales"].sum()
         game_title_df["Sales"] = game_title_df["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+        
+        # Reorder columns if needed
+        game_title_df = game_title_df[["GameTitle", "Category", "Sales"]]
+        
         st.write(game_title_df)
+        
         csv = game_title_df.to_csv(index=False).encode('utf-8')
-        st.download_button("Download Data", data=csv, file_name="Gametitle.csv", mime="text/csv", help='Click here to download the data as a CSV file')
+        st.download_button(
+            label="Download Data",
+            data=csv,
+            file_name="Gametitle.csv",
+            mime="text/csv",
+            help="Click here to download the data as a CSV file"
+        )
 
+    
     filtered_df["month_year"] = filtered_df["Order Date"].dt.to_period("M")
 
     @st.cache_data
