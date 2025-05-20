@@ -102,6 +102,16 @@ elif authentication_status:
 
     filtered_df = filter_data(filtered_game_df, region, state, city, category)
 
+    # Download Button for Raw Filtered Data
+    raw_csv = filtered_df.to_csv(index=False).encode("utf-8")
+    st.sidebar.download_button(
+        label="⬇️ Download Raw Filtered Data",
+        data=raw_csv,
+        file_name="Filtered_Raw_Data.csv",
+        mime="text/csv",
+        help="Click to download the filtered dataset as CSV"
+    )
+
     category_df = filtered_df.groupby("Category", as_index=False)["Sales"].sum()
     category_df["Sales"] = category_df["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
 
