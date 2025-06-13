@@ -33,33 +33,61 @@ elif authentication_status:
     def load_data():
         dict_df = pd.read_excel('collabreport.xlsx', sheet_name=['dataomzet', 'datagame', 'datach'])
         
-        dict_df['dataomzet']["BulanTahun"] = pd.to_datetime(dict_df['dataomzet']["BulanTahun"], errors='coerce')
-        dict_df['dataomzet']["month_year"] = dict_df['dataomzet']["BulanTahun"].dt.to_period("M")
-        
-        dict_df['datagame']["Order Date"] = pd.to_datetime(dict_df['datagame']["Order Date"], errors='coerce')
+        dict_df['dataomzet']["Bulan"] = pd.to_datetime(dict_df['dataomzet']["Bulan"], format='%m')
+        dict_df['dataomzet']["month_year"] = dict_df['dataomzet']["Bulan"].dt.to_period("M")
         
         return dict_df
 
-
     dict_df = load_data()
     dataomzet_df = dict_df['dataomzet']
-    datagame_df = dict_df['datagame']
 
-    # Omzet Perbulan (Zone|Kiddieland|Playcafe)
-    st.subheader('Omzet PLAYZONE perbulan (Zone|Kiddieland|Playcafe)')
+    # Sales Comparison (Same Month Comparison between 2024 and 2025)
+    st.subheader('Sales Comparison: Same Month in Different Years')
 
-    @st.cache_data
-    def prepare_omzet_data(df):
-        linechart = df.groupby(df["month_year"].dt.strftime("%Y : %b"))["TotalPenjualan"].sum().reset_index()
-        linechart["TotalPenjualan"] = linechart["TotalPenjualan"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
-        return linechart
+    # Select location, month, and year for comparison
+    locations = dataomzet_df['Lokasi'].unique()
+    location = st.selectbox("Select Location", locations)
 
-    linechart = prepare_omzet_data(dataomzet_df)
+    months = dataomzet_df['Bulan'].unique()
+    selected_month = st.selectbox("Select Month", months)
 
-    with st.expander("Omzet Perbulan PLAYZONE:"):
-        st.write(linechart.T.style.background_gradient(cmap="Blues"))
-        csv = linechart.to_csv(index=False).encode("utf-8")
-        st.download_button('Download Data', data=csv, file_name="TotalPenjualan.csv", mime='text/csv')
+    # Filter data for the selected location and month
+    selected_data = dataomzet_df[(dataomzet_df['Lokasi'] == location) & 
+                                 (dataomzet_df['Bulan'] == selected_month)]
+
+    # Get sales for the selected months (2025 and 2024)
+    sales_2025 = selected_data[selected_data['Tahun'] == 2025]['Total'].values[0]
+    sales_2024 = selected_data[selected_data['Tahun'] == 2024]['Total'].values[0]
+
+    # Calculate the percentage change
+    if sales_2025 != 0:
+        sales_percentage_change = ((sales_2025 - sales_2024) / sales_2025) * 100
+    else:
+        sales_percentage_change = None  # Avoid division by zero
+
+    # Display sales comparison result
+    st.write(f"Sales in {location} for Month {selected_month} in 2024: IDR {sales_2024:,.0f}")
+    st.write(f"Sales in {location} for Month {selected_month} in 2025: IDR {sales_2025:,.0f}")
+    
+    if sales_percentage_change is not None:
+        st.write(f"Sales change: {sales_percentage_change:.2f}%")
+    else:
+        st.write("Sales in 2025 is 0, cannot calculate percentage change.")
+    
+    # Option to download data
+    comparison_data = {
+        "Location": [location],
+        "Month": [selected_month],
+        "Sales 2024": [sales_2024],
+        "Sales 2025": [sales_2025],
+        "Percentage Change": [f"{sales_percentage_change:.2f}%" if sales_percentage_change else "N/A"]
+    }
+    comparison_df = pd.DataFrame(comparison_data)
+    comparison_csv = comparison_df.to_csv(index=False).encode("utf-8")
+    st.download_button('Download Data', data=comparison_csv, file_name="Sales_Comparison.csv", mime='text/csv')
+
+    # Continue with the rest of your existing code...
+
 
     # Omzet Perbulan (Kategori Game)
     st.divider()
