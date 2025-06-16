@@ -75,7 +75,7 @@ elif authentication_status:
 
         # Debugging: Check the columns of the comparison_df after merge
         st.write("Columns of comparison_df after merge:")
-        st.write(comparison_df.columns)  # Debugging the column names
+        st.write(comparison_df.head())  # Debugging the column names
 
         # Ensure the 'Lokasi', 'Total_2024', 'Total_2025' columns exist
         if 'Lokasi' in comparison_df.columns and 'Total_2024' in comparison_df.columns and 'Total_2025' in comparison_df.columns:
