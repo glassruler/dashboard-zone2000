@@ -31,13 +31,13 @@ elif authentication_status:
     # Load Data
     @st.cache_data(ttl=600)  # Refresh cache every 10 minutes
     def load_data():
-        dict_df = pd.read_excel('collabreport.xlsx', sheet_name=['dataomzet', 'dataomzet__', 'datagame', 'datach'])
+        dict_df = pd.read_excel('collabreport.xlsx', sheet_name=['dataomzet', 'dataomzet___', 'datagame', 'datach'])
         
         dict_df['dataomzet']["BulanTahun"] = pd.to_datetime(dict_df['dataomzet']["BulanTahun"], errors='coerce')
         dict_df['dataomzet']["month_year"] = dict_df['dataomzet']["BulanTahun"].dt.to_period("M")
         
-        dict_df['dataomzet__']["Bulan"] = pd.to_datetime(dict_df['dataomzet__']["Bulan"], format='%m')
-        dict_df['dataomzet__']["month_year"] = dict_df['dataomzet__']["Bulan"].dt.to_period("M")
+        dict_df['dataomzet___']["Bulan"] = pd.to_datetime(dict_df['dataomzet___']["Bulan"], format='%m')
+        dict_df['dataomzet___']["month_year"] = dict_df['dataomzet___']["Bulan"].dt.to_period("M")
         
         dict_df['datagame']["Order Date"] = pd.to_datetime(dict_df['datagame']["Order Date"], errors='coerce')
         
@@ -46,7 +46,7 @@ elif authentication_status:
 
     dict_df = load_data()
     dataomzet_df = dict_df['dataomzet']
-    dataomzet_new_df = dict_df['dataomzet__']  # New sheet with sales data for comparison
+    dataomzet_new_df = dict_df['dataomzet___']  # New sheet with sales data for comparison
     datagame_df = dict_df['datagame']
 
     # Sidebar for user filters and logout
@@ -71,22 +71,27 @@ elif authentication_status:
         sales_2024 = selected_data[selected_data['Tahun'] == 2024].groupby("Lokasi")['Total'].sum().reset_index()
 
         # Merge sales data for 2024 and 2025 by Location
-        comparison_df = pd.merge(sales_2025, sales_2024, on="Lokasi", suffixes=("_2025", "_2024"))
+        comparison_df = pd.merge(sales_2025, sales_2024, on="Lokasi", how="left", suffixes=("_2025", "_2024"))
 
         # Debugging: Check the columns of the comparison_df after merge
         st.write("Columns of comparison_df after merge:")
         st.write(comparison_df.head())  # Debugging the column names
 
         # Ensure the 'Lokasi', 'Total_2024', 'Total_2025' columns exist
-        if 'Lokasi' in comparison_df.columns and 'Total_2024' in comparison_df.columns and 'Total_2025' in comparison_df.columns:
+        if 'Lokasi' in comparison_df.columns and 'Total_2024' in comparison_df.columns:
+            # If 2025 sales are missing, set to 0 for calculation purposes
+            comparison_df['Total_2025'] = comparison_df['Total_2025'].fillna(0)
+
             # Calculate the percentage change in sales (Sales Growth)
             comparison_df['Sales Growth'] = ((comparison_df['Total_2025'] - comparison_df['Total_2024']) / comparison_df['Total_2025']) * 100
+
+            # If 2025 sales are missing, set Sales Growth to 'N/A'
+            comparison_df['Sales Growth'] = comparison_df.apply(lambda row: "N/A" if row['Total_2025'] == 0 else f"{row['Sales Growth']:.2f}%", axis=1)
 
             # Sort by Sales Growth in descending order
             comparison_df = comparison_df.sort_values(by='Sales Growth', ascending=False)
 
             # Format the columns for display
-            comparison_df["Sales Growth"] = comparison_df["Sales Growth"].apply(lambda x: f"{x:.2f}%")
             comparison_df["Total_2024"] = comparison_df["Total_2024"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
             comparison_df["Total_2025"] = comparison_df["Total_2025"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
 
