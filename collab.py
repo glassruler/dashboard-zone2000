@@ -31,7 +31,7 @@ elif authentication_status:
     # Load Data
     @st.cache_data(ttl=600)  # Refresh cache every 10 minutes
     def load_data():
-        dict_df = pd.read_excel('collabreport.xlsx', sheet_name=['dataomzet', 'dataomzet__', 'datagame', 'datach'])
+        dict_df = pd.read_excel('collabreport.xlsx', sheet_name=['dataomzet', 'dataomzet___', 'datagame', 'datach'])
         
         dict_df['dataomzet']["BulanTahun"] = pd.to_datetime(dict_df['dataomzet']["BulanTahun"], errors='coerce')
         dict_df['dataomzet']["month_year"] = dict_df['dataomzet']["BulanTahun"].dt.to_period("M")
@@ -53,67 +53,48 @@ elif authentication_status:
     st.sidebar.title(f"Welcome {name}")
     st.sidebar.header("Choose your filter:")
 
-    # Omzet Perbulan (Zone|Kiddieland|Playcafe)
-    st.subheader('Omzet PLAYZONE perbulan (Zone|Kiddieland|Playcafe)')
-
-    @st.cache_data
-    def prepare_omzet_data(df):
-        linechart = df.groupby(df["month_year"].dt.strftime("%Y : %b"))["TotalPenjualan"].sum().reset_index()
-        linechart["TotalPenjualan"] = linechart["TotalPenjualan"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
-        return linechart
-
-    linechart = prepare_omzet_data(dataomzet_df)
-
-    with st.expander("Omzet Perbulan PLAYZONE:"):
-        st.write(linechart.T.style.background_gradient(cmap="Blues"))
-        csv = linechart.to_csv(index=False).encode("utf-8")
-        st.download_button('Download Data', data=csv, file_name="TotalPenjualan.csv", mime='text/csv')
-
     # Sales Comparison (New Sales Comparison between 2024 and 2025)
     st.divider()
     st.subheader('Sales Comparison: Same Month in Different Years (2024 vs. 2025)')
 
-    # Select location, month, and year for comparison from the new data (dataomzet___)
-    locations = dataomzet_new_df['Lokasi'].unique()
-    location = st.selectbox("Select Location", locations)
-
+    # Select month, set initial value to None so it starts blank
     months = dataomzet_new_df['Bulan'].unique()
-    selected_month = st.selectbox("Select Month", months)
+    selected_month = st.selectbox("Select Month", options=[""] + list(months), key="month_select")
 
-    # Filter data for the selected location and month
-    selected_data = dataomzet_new_df[(dataomzet_new_df['Lokasi'] == location) & 
-                                     (dataomzet_new_df['Bulan'] == selected_month)]
+    # When a month is selected, show locations and sales data
+    if selected_month:
+        # Filter data for the selected month
+        selected_data = dataomzet_new_df[dataomzet_new_df['Bulan'] == selected_month]
 
-    # Get sales for the selected months (2025 and 2024)
-    sales_2025 = selected_data[selected_data['Tahun'] == 2025]['Total'].values[0]
-    sales_2024 = selected_data[selected_data['Tahun'] == 2024]['Total'].values[0]
+        # Get the sales for the selected month (2024 and 2025)
+        sales_2025 = selected_data[selected_data['Tahun'] == 2025].groupby("Lokasi")['Total'].sum().reset_index()
+        sales_2024 = selected_data[selected_data['Tahun'] == 2024].groupby("Lokasi")['Total'].sum().reset_index()
 
-    # Calculate the percentage change
-    if sales_2025 != 0:
-        sales_percentage_change = ((sales_2025 - sales_2024) / sales_2025) * 100
+        # Merge sales data for 2024 and 2025 by Location
+        comparison_df = pd.merge(sales_2025, sales_2024, on="Lokasi", suffixes=("_2025", "_2024"))
+
+        # Calculate the percentage change in sales
+        comparison_df['Sales Change'] = ((comparison_df['Total_2025'] - comparison_df['Total_2024']) / comparison_df['Total_2025']) * 100
+
+        # Sort by Sales Change in descending order
+        comparison_df = comparison_df.sort_values(by='Sales Change', ascending=False)
+
+        # Display the results
+        comparison_df["Sales Change"] = comparison_df["Sales Change"].apply(lambda x: f"{x:.2f}%")
+        comparison_df["Total_2024"] = comparison_df["Total_2024"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+        comparison_df["Total_2025"] = comparison_df["Total_2025"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+
+        st.write(comparison_df[["Lokasi", "Bulan", "Total_2024", "Total_2025", "Sales Change"]])
+
+        # Option to download data
+        comparison_csv = comparison_df.to_csv(index=False).encode("utf-8")
+        st.download_button('Download Sales Comparison Data', data=comparison_csv, file_name="Sales_Comparison.csv", mime='text/csv')
     else:
-        sales_percentage_change = None  # Avoid division by zero
+        st.warning("Please select a month to see the comparison.")
 
-    # Display sales comparison result
-    st.write(f"Sales in {location} for Month {selected_month} in 2024: IDR {sales_2024:,.0f}")
-    st.write(f"Sales in {location} for Month {selected_month} in 2025: IDR {sales_2025:,.0f}")
-    
-    if sales_percentage_change is not None:
-        st.write(f"Sales change: {sales_percentage_change:.2f}%")
-    else:
-        st.write("Sales in 2025 is 0, cannot calculate percentage change.")
-    
-    # Option to download data
-    comparison_data = {
-        "Location": [location],
-        "Month": [selected_month],
-        "Sales 2024": [sales_2024],
-        "Sales 2025": [sales_2025],
-        "Percentage Change": [f"{sales_percentage_change:.2f}%" if sales_percentage_change else "N/A"]
-    }
-    comparison_df = pd.DataFrame(comparison_data)
-    comparison_csv = comparison_df.to_csv(index=False).encode("utf-8")
-    st.download_button('Download Data', data=comparison_csv, file_name="Sales_Comparison.csv", mime='text/csv')
+    # Continue with the rest of your existing code...
+    # (you can keep the rest of the code for other visualizations or sections)
+
 
     # Omzet Perbulan (Kategori Game)
     st.divider()
