@@ -36,8 +36,8 @@ elif authentication_status:
         dict_df['dataomzet']["BulanTahun"] = pd.to_datetime(dict_df['dataomzet']["BulanTahun"], errors='coerce')
         dict_df['dataomzet']["month_year"] = dict_df['dataomzet']["BulanTahun"].dt.to_period("M")
         
-        dict_df['dataomzet___']["Bulan"] = pd.to_datetime(dict_df['dataomzet___']["Bulan"], format='%m')
-        dict_df['dataomzet___']["month_year"] = dict_df['dataomzet___']["Bulan"].dt.to_period("M")
+        dict_df['dataomzet__']["Bulan"] = pd.to_datetime(dict_df['dataomzet___']["Bulan"], format='%m')
+        dict_df['dataomzet__']["month_year"] = dict_df['dataomzet__']["Bulan"].dt.to_period("M")
         
         dict_df['datagame']["Order Date"] = pd.to_datetime(dict_df['datagame']["Order Date"], errors='coerce')
         
