@@ -31,13 +31,13 @@ elif authentication_status:
     # Load Data
     @st.cache_data(ttl=600)  # Refresh cache every 10 minutes
     def load_data():
-        dict_df = pd.read_excel('collabreport.xlsx', sheet_name=['dataomzet', 'dataomzet__', 'datagame', 'datach'])
+        dict_df = pd.read_excel('collabreport.xlsx', sheet_name=['dataomzet', 'dataomzet___', 'datagame', 'datach'])
         
         dict_df['dataomzet']["BulanTahun"] = pd.to_datetime(dict_df['dataomzet']["BulanTahun"], errors='coerce')
         dict_df['dataomzet']["month_year"] = dict_df['dataomzet']["BulanTahun"].dt.to_period("M")
         
-        dict_df['dataomzet__']["Bulan"] = pd.to_datetime(dict_df['dataomzet__']["Bulan"], format='%m')
-        dict_df['dataomzet__']["month_year"] = dict_df['dataomzet__']["Bulan"].dt.to_period("M")
+        dict_df['dataomzet___']["Bulan"] = pd.to_datetime(dict_df['dataomzet___']["Bulan"], format='%m')
+        dict_df['dataomzet___']["month_year"] = dict_df['dataomzet___']["Bulan"].dt.to_period("M")
         
         dict_df['datagame']["Order Date"] = pd.to_datetime(dict_df['datagame']["Order Date"], errors='coerce')
         
@@ -46,7 +46,7 @@ elif authentication_status:
 
     dict_df = load_data()
     dataomzet_df = dict_df['dataomzet']
-    dataomzet_new_df = dict_df['dataomzet__']  # New sheet with sales data for comparison
+    dataomzet_new_df = dict_df['dataomzet___']  # New sheet with sales data for comparison
     datagame_df = dict_df['datagame']
 
     # Sidebar for user filters and logout
@@ -73,7 +73,7 @@ elif authentication_status:
         # Merge sales data for 2024 and 2025 by Location
         comparison_df = pd.merge(sales_2025, sales_2024, on="Lokasi", how="left", suffixes=("_2025", "_2024"))
 
-        # Debugging: Check the columns of the comparison_df after merge
+        # Debugging: Check the columns and first few rows of the comparison_df after merge
         st.write("Columns of comparison_df after merge:")
         st.write(comparison_df.head())  # Debugging the column names
 
@@ -108,9 +108,6 @@ elif authentication_status:
 
     # Continue with the rest of your existing code...
     # (you can keep the rest of the code for other visualizations or sections)
-
-
-
 
 
     # Omzet Perbulan (Kategori Game)
