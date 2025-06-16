@@ -86,17 +86,31 @@ elif authentication_status:
     region = st.sidebar.multiselect("Pick your Branch", filtered_game_df["Center"].unique())
     state = st.sidebar.multiselect("Pick the Game Title", filtered_game_df["GameTitle"].unique())
     city = st.sidebar.multiselect("Pick the Game Code", filtered_game_df["Keterangan"].unique())
+    category = st.sidebar.multiselect("Pick the Game Category", filtered_game_df["Category"].dropna().unique())
 
-    def filter_data(df, regions, states, cities):
+    def filter_data(df, regions, states, cities, categories):
         if regions:
             df = df[df["Center"].isin(regions)]
         if states:
             df = df[df["GameTitle"].isin(states)]
         if cities:
             df = df[df["Keterangan"].isin(cities)]
+        if categories:
+            df = df[df["Category"].isin(categories)]
         return df
 
-    filtered_df = filter_data(filtered_game_df, region, state, city)
+
+    filtered_df = filter_data(filtered_game_df, region, state, city, category)
+
+    # Download Button for Raw Filtered Data
+    raw_csv = filtered_df.to_csv(index=False).encode("utf-8")
+    st.sidebar.download_button(
+        label="⬇️ Download Raw Filtered Data",
+        data=raw_csv,
+        file_name="Filtered_Raw_Data.csv",
+        mime="text/csv",
+        help="Click to download the filtered dataset as CSV"
+    )
 
     category_df = filtered_df.groupby("Category", as_index=False)["Sales"].sum()
     category_df["Sales"] = category_df["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
@@ -112,12 +126,29 @@ elif authentication_status:
         csv = region_df.to_csv(index=False).encode('utf-8')
         st.download_button("Download Data", data=csv, file_name="Cabang.csv", mime="text/csv", help='Click here to download the data as a CSV file')
 
-        game_title_df = filtered_df.groupby("GameTitle", as_index=False)["Sales"].sum()
+        #game_title_df = filtered_df.groupby("GameTitle", as_index=False)["Sales"].sum()
+        #game_title_df["Sales"] = game_title_df["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+        #st.write(game_title_df)
+        #csv = game_title_df.to_csv(index=False).encode('utf-8')
+        #st.download_button("Download Data", data=csv, file_name="Gametitle.csv", mime="text/csv", help='Click here to download the data as a CSV file')
+        game_title_df = filtered_df.groupby(["GameTitle", "Category"], as_index=False)["Sales"].sum()
         game_title_df["Sales"] = game_title_df["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+        
+        # Reorder columns if needed
+        game_title_df = game_title_df[["GameTitle", "Category", "Sales"]]
+        
         st.write(game_title_df)
+        
         csv = game_title_df.to_csv(index=False).encode('utf-8')
-        st.download_button("Download Data", data=csv, file_name="Gametitle.csv", mime="text/csv", help='Click here to download the data as a CSV file')
+        st.download_button(
+            label="Download Data",
+            data=csv,
+            file_name="Gametitle.csv",
+            mime="text/csv",
+            help="Click here to download the data as a CSV file"
+        )
 
+    
     filtered_df["month_year"] = filtered_df["Order Date"].dt.to_period("M")
 
     @st.cache_data
