@@ -46,7 +46,7 @@ elif authentication_status:
 
     dict_df = load_data()
     dataomzet_df = dict_df['dataomzet']
-    dataomzet_new_df = dict_df['dataomzet___']  # New sheet with sales data for comparison
+    dataomzet_new_df = dict_df['dataomzet__']  # New sheet with sales data for comparison
     datagame_df = dict_df['datagame']
 
     # Sidebar for user filters and logout
