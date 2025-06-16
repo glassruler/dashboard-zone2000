@@ -57,58 +57,50 @@ elif authentication_status:
     st.divider()
     st.subheader('Sales Comparison: Same Month in Different Years (2024 vs. 2025)')
 
-    # Select month, set initial value to None so it starts blank
-    months = dataomzet_new_df['Bulan'].dt.month.unique()
-    selected_month = st.selectbox("Select Month", options=[""] + list(months), key="month_select")
+    # Select location, month, and year for comparison from the new data (dataomzet___)
+    locations = dataomzet_new_df['Lokasi'].unique()
+    location = st.selectbox("Select Location", locations)
 
-    # When a month is selected, show locations and sales data
-    if selected_month:
-        # Filter data for the selected month
-        selected_data = dataomzet_new_df[dataomzet_new_df['Bulan'].dt.month == selected_month]
+    months = dataomzet_new_df['Bulan'].unique()
+    selected_month = st.selectbox("Select Month", months)
 
-        # Get the sales for the selected month (2024 and 2025)
-        sales_2025 = selected_data[selected_data['Tahun'] == 2025].groupby("Lokasi")['Total'].sum().reset_index()
-        sales_2024 = selected_data[selected_data['Tahun'] == 2024].groupby("Lokasi")['Total'].sum().reset_index()
+    # Filter data for the selected location and month
+    selected_data = dataomzet_new_df[(dataomzet_new_df['Lokasi'] == location) & 
+                                     (dataomzet_new_df['Bulan'] == selected_month)]
 
-        # Merge sales data for 2024 and 2025 by Location
-        comparison_df = pd.merge(sales_2025, sales_2024, on="Lokasi", how="left", suffixes=("_2025", "_2024"))
+    # Ensure sales for both 2024 and 2025 exist for the selected location and month
+    sales_2025 = selected_data[selected_data['Tahun'] == 2025]['Total']
+    sales_2024 = selected_data[selected_data['Tahun'] == 2024]['Total']
 
-        # Debugging: Check the columns and first few rows of the comparison_df after merge
-        st.write("Columns of comparison_df after merge:")
-        st.write(comparison_df.head())  # Debugging the column names
+    # Check if sales exist for both years, otherwise set to 0
+    sales_2025_value = sales_2025.values[0] if not sales_2025.empty else 0
+    sales_2024_value = sales_2024.values[0] if not sales_2024.empty else 0
 
-        # Ensure the 'Lokasi', 'Total_2024', 'Total_2025' columns exist
-        if 'Lokasi' in comparison_df.columns and 'Total_2024' in comparison_df.columns:
-            # If 2025 sales are missing, set to 0 for calculation purposes
-            comparison_df['Total_2025'] = comparison_df['Total_2025'].fillna(0)
-
-            # Calculate the percentage change in sales (Sales Growth)
-            comparison_df['Sales Growth'] = ((comparison_df['Total_2025'] - comparison_df['Total_2024']) / comparison_df['Total_2025']) * 100
-
-            # If 2025 sales are missing, set Sales Growth to 'N/A'
-            comparison_df['Sales Growth'] = comparison_df.apply(lambda row: "N/A" if row['Total_2025'] == 0 else f"{row['Sales Growth']:.2f}%", axis=1)
-
-            # Sort by Sales Growth in descending order
-            comparison_df = comparison_df.sort_values(by='Sales Growth', ascending=False)
-
-            # Format the columns for display
-            comparison_df["Total_2024"] = comparison_df["Total_2024"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
-            comparison_df["Total_2025"] = comparison_df["Total_2025"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
-
-            # Display the results with the desired column names
-            st.write(comparison_df[["Lokasi", "Bulan", "Total_2024", "Total_2025", "Sales Growth"]])
-
-            # Option to download data
-            comparison_csv = comparison_df.to_csv(index=False).encode("utf-8")
-            st.download_button('Download Sales Comparison Data', data=comparison_csv, file_name="Sales_Comparison.csv", mime='text/csv')
-        else:
-            st.error("Required columns are missing from the data. Please check the data format.")
+    # Calculate the percentage change
+    if sales_2025_value != 0:
+        sales_percentage_change = ((sales_2025_value - sales_2024_value) / sales_2025_value) * 100
+        sales_percentage_change_text = f"{sales_percentage_change:.2f}%"
     else:
-        st.warning("Please select a month to see the comparison.")
+        sales_percentage_change = None  # Avoid division by zero
+        sales_percentage_change_text = "N/A"
 
-    # Continue with the rest of your existing code...
-    # (you can keep the rest of the code for other visualizations or sections)
+    # Display sales comparison result
+    st.write(f"Sales in {location} for Month {selected_month} in 2024: IDR {sales_2024_value:,.0f}")
+    st.write(f"Sales in {location} for Month {selected_month} in 2025: IDR {sales_2025_value:,.0f}")
+    
+    st.write(f"Sales change: {sales_percentage_change_text}")
 
+    # Option to download data
+    comparison_data = {
+        "Location": [location],
+        "Month": [selected_month],
+        "Sales 2024": [sales_2024_value],
+        "Sales 2025": [sales_2025_value],
+        "Percentage Change": [sales_percentage_change_text]
+    }
+    comparison_df = pd.DataFrame(comparison_data)
+    comparison_csv = comparison_df.to_csv(index=False).encode("utf-8")
+    st.download_button('Download Data', data=comparison_csv, file_name="Sales_Comparison.csv", mime='text/csv')
 
     # Omzet Perbulan (Kategori Game)
     st.divider()
@@ -173,22 +165,21 @@ elif authentication_status:
 
         game_title_df = filtered_df.groupby(["GameTitle", "Category"], as_index=False)["Sales"].sum()
         game_title_df["Sales"] = game_title_df["Sales"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
-        
+
         # Reorder columns if needed
         game_title_df = game_title_df[["GameTitle", "Category", "Sales"]]
-        
+
         st.write(game_title_df)
-        
+
         csv = game_title_df.to_csv(index=False).encode('utf-8')
         st.download_button(
             label="Download Data",
             data=csv,
             file_name="Gametitle.csv",
             mime="text/csv",
-            help="Click here to download the data as a CSV file"
-        )
+            help="Click here to download the data as a CSV file")
 
-    
+
     filtered_df["month_year"] = filtered_df["Order Date"].dt.to_period("M")
 
     @st.cache_data
