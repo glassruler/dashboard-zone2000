@@ -58,13 +58,13 @@ elif authentication_status:
     st.subheader('Sales Comparison: Same Month in Different Years (2024 vs. 2025)')
 
     # Select month, set initial value to None so it starts blank
-    months = dataomzet_new_df['Bulan'].unique()
+    months = dataomzet_new_df['Bulan'].dt.month.unique()
     selected_month = st.selectbox("Select Month", options=[""] + list(months), key="month_select")
 
     # When a month is selected, show locations and sales data
     if selected_month:
         # Filter data for the selected month
-        selected_data = dataomzet_new_df[dataomzet_new_df['Bulan'] == selected_month]
+        selected_data = dataomzet_new_df[dataomzet_new_df['Bulan'].dt.month == selected_month]
 
         # Get the sales for the selected month (2024 and 2025)
         sales_2025 = selected_data[selected_data['Tahun'] == 2025].groupby("Lokasi")['Total'].sum().reset_index()
@@ -103,6 +103,7 @@ elif authentication_status:
 
     # Continue with the rest of your existing code...
     # (you can keep the rest of the code for other visualizations or sections)
+
 
 
 
