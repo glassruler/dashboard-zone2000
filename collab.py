@@ -73,28 +73,38 @@ elif authentication_status:
         # Merge sales data for 2024 and 2025 by Location
         comparison_df = pd.merge(sales_2025, sales_2024, on="Lokasi", suffixes=("_2025", "_2024"))
 
-        # Calculate the percentage change in sales (Sales Growth)
-        comparison_df['Sales Growth'] = ((comparison_df['Total_2025'] - comparison_df['Total_2024']) / comparison_df['Total_2025']) * 100
+        # Debugging: Check the columns of the comparison_df after merge
+        st.write("Columns of comparison_df after merge:")
+        st.write(comparison_df.columns)
 
-        # Sort by Sales Growth in descending order
-        comparison_df = comparison_df.sort_values(by='Sales Growth', ascending=False)
+        # Check if 'Lokasi', 'Total_2024', 'Total_2025' are in the columns
+        if 'Lokasi' in comparison_df.columns and 'Total_2024' in comparison_df.columns and 'Total_2025' in comparison_df.columns:
+            # Calculate the percentage change in sales (Sales Growth)
+            comparison_df['Sales Growth'] = ((comparison_df['Total_2025'] - comparison_df['Total_2024']) / comparison_df['Total_2025']) * 100
 
-        # Format the columns for display
-        comparison_df["Sales Growth"] = comparison_df["Sales Growth"].apply(lambda x: f"{x:.2f}%")
-        comparison_df["Total_2024"] = comparison_df["Total_2024"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
-        comparison_df["Total_2025"] = comparison_df["Total_2025"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+            # Sort by Sales Growth in descending order
+            comparison_df = comparison_df.sort_values(by='Sales Growth', ascending=False)
 
-        # Display the results with the desired column names
-        st.write(comparison_df[["Lokasi", "Bulan", "Total_2024", "Total_2025", "Sales Growth"]])
+            # Format the columns for display
+            comparison_df["Sales Growth"] = comparison_df["Sales Growth"].apply(lambda x: f"{x:.2f}%")
+            comparison_df["Total_2024"] = comparison_df["Total_2024"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
+            comparison_df["Total_2025"] = comparison_df["Total_2025"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
 
-        # Option to download data
-        comparison_csv = comparison_df.to_csv(index=False).encode("utf-8")
-        st.download_button('Download Sales Comparison Data', data=comparison_csv, file_name="Sales_Comparison.csv", mime='text/csv')
+            # Display the results with the desired column names
+            st.write(comparison_df[["Lokasi", "Bulan", "Total_2024", "Total_2025", "Sales Growth"]])
+
+            # Option to download data
+            comparison_csv = comparison_df.to_csv(index=False).encode("utf-8")
+            st.download_button('Download Sales Comparison Data', data=comparison_csv, file_name="Sales_Comparison.csv", mime='text/csv')
+        else:
+            st.error("Required columns are missing from the data. Please check the data format.")
+
     else:
         st.warning("Please select a month to see the comparison.")
 
     # Continue with the rest of your existing code...
     # (you can keep the rest of the code for other visualizations or sections)
+
 
     # Omzet Perbulan (Kategori Game)
     st.divider()
