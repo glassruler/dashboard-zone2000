@@ -73,18 +73,19 @@ elif authentication_status:
         # Merge sales data for 2024 and 2025 by Location
         comparison_df = pd.merge(sales_2025, sales_2024, on="Lokasi", suffixes=("_2025", "_2024"))
 
-        # Calculate the percentage change in sales
-        comparison_df['Sales Change'] = ((comparison_df['Total_2025'] - comparison_df['Total_2024']) / comparison_df['Total_2025']) * 100
+        # Calculate the percentage change in sales (Sales Growth)
+        comparison_df['Sales Growth'] = ((comparison_df['Total_2025'] - comparison_df['Total_2024']) / comparison_df['Total_2025']) * 100
 
-        # Sort by Sales Change in descending order
-        comparison_df = comparison_df.sort_values(by='Sales Change', ascending=False)
+        # Sort by Sales Growth in descending order
+        comparison_df = comparison_df.sort_values(by='Sales Growth', ascending=False)
 
-        # Display the results
-        comparison_df["Sales Change"] = comparison_df["Sales Change"].apply(lambda x: f"{x:.2f}%")
+        # Format the columns for display
+        comparison_df["Sales Growth"] = comparison_df["Sales Growth"].apply(lambda x: f"{x:.2f}%")
         comparison_df["Total_2024"] = comparison_df["Total_2024"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
         comparison_df["Total_2025"] = comparison_df["Total_2025"].apply(lambda x: f"IDR {x:,.0f}".replace(",", "."))
 
-        st.write(comparison_df[["Lokasi", "Bulan", "Total_2024", "Total_2025", "Sales Change"]])
+        # Display the results with the desired column names
+        st.write(comparison_df[["Lokasi", "Bulan", "Total_2024", "Total_2025", "Sales Growth"]])
 
         # Option to download data
         comparison_csv = comparison_df.to_csv(index=False).encode("utf-8")
@@ -94,7 +95,6 @@ elif authentication_status:
 
     # Continue with the rest of your existing code...
     # (you can keep the rest of the code for other visualizations or sections)
-
 
     # Omzet Perbulan (Kategori Game)
     st.divider()
