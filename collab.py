@@ -31,12 +31,12 @@ elif authentication_status:
     # Load Data
     @st.cache_data(ttl=600)  # Refresh cache every 10 minutes
     def load_data():
-        dict_df = pd.read_excel('collabreport.xlsx', sheet_name=['dataomzet', 'dataomzet___', 'datagame', 'datach'])
+        dict_df = pd.read_excel('collabreport.xlsx', sheet_name=['dataomzet', 'dataomzet__', 'datagame', 'datach'])
         
         dict_df['dataomzet']["BulanTahun"] = pd.to_datetime(dict_df['dataomzet']["BulanTahun"], errors='coerce')
         dict_df['dataomzet']["month_year"] = dict_df['dataomzet']["BulanTahun"].dt.to_period("M")
         
-        dict_df['dataomzet__']["Bulan"] = pd.to_datetime(dict_df['dataomzet___']["Bulan"], format='%m')
+        dict_df['dataomzet__']["Bulan"] = pd.to_datetime(dict_df['dataomzet__']["Bulan"], format='%m')
         dict_df['dataomzet__']["month_year"] = dict_df['dataomzet__']["Bulan"].dt.to_period("M")
         
         dict_df['datagame']["Order Date"] = pd.to_datetime(dict_df['datagame']["Order Date"], errors='coerce')
