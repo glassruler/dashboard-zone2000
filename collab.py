@@ -58,8 +58,6 @@ elif authentication_status:
     # --- Sales Comparison View (All Locations for Selected Month) ---
     st.divider()
     st.subheader('Sales Comparison: All Locations in a Selected Month (2024 vs. 2025)')
-    
-    
 
     # Convert to datetime just once if not already done (can be skipped if already parsed)
     dataomzet_new_df['Bulan'] = pd.to_datetime(dataomzet_new_df['Bulan'], errors='coerce')
@@ -75,20 +73,29 @@ elif authentication_status:
     # Filter based on selected month name
     monthly_data = dataomzet_new_df[dataomzet_new_df['Month_Name'] == selected_month_name]
     
-    # Group and pivot the data by location and year
+    # Pivot safely: group data by location and year
     pivot_df = monthly_data.pivot_table(index='Lokasi', columns='Tahun', values='Total', aggfunc='sum').reset_index()
     pivot_df.columns.name = None
+    
+    # Ensure both columns exist
+    if 2024 not in pivot_df.columns:
+        pivot_df[2024] = 0
+    if 2025 not in pivot_df.columns:
+        pivot_df[2025] = 0
+    
+    # Rename for consistency
     pivot_df = pivot_df.rename(columns={2024: 'Sales 2024', 2025: 'Sales 2025'})
     
-    # Fill missing values
+    # Fill NaNs if any
     pivot_df['Sales 2024'] = pivot_df['Sales 2024'].fillna(0)
     pivot_df['Sales 2025'] = pivot_df['Sales 2025'].fillna(0)
     
-    # Calculate percentage change
+    # Calculate percentage change safely
     pivot_df['Sales change'] = pivot_df.apply(
         lambda row: f"{((row['Sales 2025'] - row['Sales 2024']) / row['Sales 2025']) * 100:.2f}%" if row['Sales 2025'] != 0 else "N/A",
         axis=1
     )
+
     
     # Add readable month name to output
     pivot_df.insert(1, 'Bulan', selected_month_name)
