@@ -54,53 +54,46 @@ elif authentication_status:
     st.sidebar.header("Choose your filter:")
 
     # Sales Comparison (New Sales Comparison between 2024 and 2025)
+    # --- Sales Comparison View (All Locations for Selected Month) ---
     st.divider()
-    st.subheader('Sales Comparison: Same Month in Different Years (2024 vs. 2025)')
-
-    # Select location, month, and year for comparison from the new data (dataomzet___)
-    locations = dataomzet_new_df['Lokasi'].unique()
-    location = st.selectbox("Select Location", locations)
-
-    months = dataomzet_new_df['Bulan'].unique()
-    selected_month = st.selectbox("Select Month", months)
-
-    # Filter data for the selected location and month
-    selected_data = dataomzet_new_df[(dataomzet_new_df['Lokasi'] == location) & 
-                                     (dataomzet_new_df['Bulan'] == selected_month)]
-
-    # Ensure sales for both 2024 and 2025 exist for the selected location and month
-    sales_2025 = selected_data[selected_data['Tahun'] == 2025]['Total']
-    sales_2024 = selected_data[selected_data['Tahun'] == 2024]['Total']
-
-    # Check if sales exist for both years, otherwise set to 0
-    sales_2025_value = sales_2025.values[0] if not sales_2025.empty else 0
-    sales_2024_value = sales_2024.values[0] if not sales_2024.empty else 0
-
-    # Calculate the percentage change
-    if sales_2025_value != 0:
-        sales_percentage_change = ((sales_2025_value - sales_2024_value) / sales_2025_value) * 100
-        sales_percentage_change_text = f"{sales_percentage_change:.2f}%"
-    else:
-        sales_percentage_change = None  # Avoid division by zero
-        sales_percentage_change_text = "N/A"
-
-    # Display sales comparison result
-    st.write(f"Sales in {location} for Month {selected_month} in 2024: IDR {sales_2024_value:,.0f}")
-    st.write(f"Sales in {location} for Month {selected_month} in 2025: IDR {sales_2025_value:,.0f}")
+    st.subheader('Sales Comparison: All Locations in a Selected Month (2024 vs. 2025)')
     
-    st.write(f"Sales change: {sales_percentage_change_text}")
-
-    # Option to download data
-    comparison_data = {
-        "Location": [location],
-        "Month": [selected_month],
-        "Sales 2024": [sales_2024_value],
-        "Sales 2025": [sales_2025_value],
-        "Percentage Change": [sales_percentage_change_text]
-    }
-    comparison_df = pd.DataFrame(comparison_data)
-    comparison_csv = comparison_df.to_csv(index=False).encode("utf-8")
-    st.download_button('Download Data', data=comparison_csv, file_name="Sales_Comparison.csv", mime='text/csv')
+    # Select month only (now shows all locations)
+    unique_months = dataomzet_new_df['Bulan'].unique()
+    selected_month = st.selectbox("Select Month", sorted(unique_months))
+    
+    # Filter all data for the selected month
+    monthly_data = dataomzet_new_df[dataomzet_new_df['Bulan'] == selected_month]
+    
+    # Pivot or group the data by location and year
+    pivot_df = monthly_data.pivot_table(index='Lokasi', columns='Tahun', values='Total', aggfunc='sum').reset_index()
+    pivot_df.columns.name = None  # remove pivot level name
+    pivot_df = pivot_df.rename(columns={2024: 'Sales 2024', 2025: 'Sales 2025'})
+    
+    # Fill NaNs with 0 in case some locations have only one year's data
+    pivot_df['Sales 2024'] = pivot_df['Sales 2024'].fillna(0)
+    pivot_df['Sales 2025'] = pivot_df['Sales 2025'].fillna(0)
+    
+    # Calculate percentage change
+    pivot_df['Sales change'] = pivot_df.apply(
+        lambda row: f"{((row['Sales 2025'] - row['Sales 2024']) / row['Sales 2025']) * 100:.2f}%" if row['Sales 2025'] != 0 else "N/A",
+        axis=1
+    )
+    
+    # Add selected month column
+    pivot_df.insert(1, 'Bulan', selected_month)
+    
+    # Display the table
+    st.dataframe(pivot_df)
+    
+    # Export to CSV
+    comparison_csv = pivot_df.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="Download Monthly Sales Comparison",
+        data=comparison_csv,
+        file_name=f"Sales_Comparison_Month_{selected_month}.csv",
+        mime='text/csv'
+    )
 
     # Omzet Perbulan (Kategori Game)
     st.divider()
