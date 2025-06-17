@@ -3,6 +3,7 @@ from pathlib import Path
 import streamlit as st
 import pandas as pd
 import streamlit_authenticator as stauth
+import calendar
 
 # Page Configuration
 st.set_page_config(page_title="DASH GAME", page_icon=":bar_chart:", layout="wide")
@@ -58,19 +59,28 @@ elif authentication_status:
     st.divider()
     st.subheader('Sales Comparison: All Locations in a Selected Month (2024 vs. 2025)')
     
-    # Select month only (now shows all locations)
-    unique_months = dataomzet_new_df['Bulan'].unique()
-    selected_month = st.selectbox("Select Month", sorted(unique_months))
     
-    # Filter all data for the selected month
-    monthly_data = dataomzet_new_df[dataomzet_new_df['Bulan'] == selected_month]
+
+    # Convert to datetime just once if not already done (can be skipped if already parsed)
+    dataomzet_new_df['Bulan'] = pd.to_datetime(dataomzet_new_df['Bulan'], errors='coerce')
     
-    # Pivot or group the data by location and year
+    # Extract month number and name into new columns
+    dataomzet_new_df['Month_Num'] = dataomzet_new_df['Bulan'].dt.month
+    dataomzet_new_df['Month_Name'] = dataomzet_new_df['Month_Num'].apply(lambda x: calendar.month_name[x])
+    
+    # Get unique month names for dropdown
+    unique_months = dataomzet_new_df['Month_Name'].unique()
+    selected_month_name = st.selectbox("Select Month", sorted(unique_months, key=lambda x: list(calendar.month_name).index(x)))
+    
+    # Filter based on selected month name
+    monthly_data = dataomzet_new_df[dataomzet_new_df['Month_Name'] == selected_month_name]
+    
+    # Group and pivot the data by location and year
     pivot_df = monthly_data.pivot_table(index='Lokasi', columns='Tahun', values='Total', aggfunc='sum').reset_index()
-    pivot_df.columns.name = None  # remove pivot level name
+    pivot_df.columns.name = None
     pivot_df = pivot_df.rename(columns={2024: 'Sales 2024', 2025: 'Sales 2025'})
     
-    # Fill NaNs with 0 in case some locations have only one year's data
+    # Fill missing values
     pivot_df['Sales 2024'] = pivot_df['Sales 2024'].fillna(0)
     pivot_df['Sales 2025'] = pivot_df['Sales 2025'].fillna(0)
     
@@ -80,20 +90,21 @@ elif authentication_status:
         axis=1
     )
     
-    # Add selected month column
-    pivot_df.insert(1, 'Bulan', selected_month)
+    # Add readable month name to output
+    pivot_df.insert(1, 'Bulan', selected_month_name)
     
-    # Display the table
+    # Display table
     st.dataframe(pivot_df)
     
-    # Export to CSV
+    # Download option
     comparison_csv = pivot_df.to_csv(index=False).encode("utf-8")
     st.download_button(
         label="Download Monthly Sales Comparison",
         data=comparison_csv,
-        file_name=f"Sales_Comparison_Month_{selected_month}.csv",
+        file_name=f"Sales_Comparison_{selected_month_name}.csv",
         mime='text/csv'
     )
+
 
     # Omzet Perbulan (Kategori Game)
     st.divider()
