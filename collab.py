@@ -92,7 +92,7 @@ elif authentication_status:
     
     # Calculate percentage change safely
     pivot_df['Sales change'] = pivot_df.apply(
-        lambda row: f"{((row['Sales 2025'] - row['Sales 2024']) / row['Sales 2025']) * 100:.2f}%" if row['Sales 2025'] != 0 else "N/A",
+        lambda row: f"{((row['Sales 2025'] - row['Sales 2024']) / row['Sales 2024']) * 100:.2f}%" if row['Sales 2025'] != 0 else "N/A",
         axis=1
     )
 
